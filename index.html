@@ -1,177 +1,176 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Mail Generator</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 30px;
-      background: #f4f6f9;
-    }
-    .container {
-      max-width: 500px;
-      margin: auto;
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-    h2 {
-      text-align: center;
-      color: #333;
-    }
-    label {
-      font-weight: bold;
-      margin-top: 10px;
-      display: block;
-    }
-    input {
-      width: 100%;
-      padding: 8px;
-      margin: 5px 0 15px 0;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    button {
-      padding: 8px 16px;
-      border: none;
-      border-radius: 8px;
-      background: #007bff;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 5px;
-    }
-    button:hover {
-      background: #0056b3;
-    }
-    .output-box {
-      background: #f1f1f1;
-      padding: 10px;
-      border-radius: 8px;
-      margin-top: 15px;
-    }
-    .row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-    .row span {
-      flex: 1;
-      font-family: monospace;
-      color: #333;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mail ID Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f7f9;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #0056b3;
+            margin-bottom: 25px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box; /* Important for padding/border calculation */
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result-container {
+            margin-top: 30px;
+            padding: 15px;
+            border: 2px solid #28a745;
+            border-radius: 5px;
+            background-color: #e2f0e9;
+            display: none; /* Initially hidden */
+        }
+        #mail-id-display {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #28a745;
+            word-break: break-all;
+        }
+        .copy-button {
+            background-color: #28a745;
+            margin-top: 15px;
+        }
+        .copy-button:hover {
+            background-color: #1e7e34;
+        }
+        .copied {
+            background-color: #1e7e34;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Mail & Password Generator</h2>
 
-    <label for="formNo">Form Number:</label>
-    <input type="number" id="formNo" placeholder="Enter Form Number">
+<div class="container">
+    <h2>📝 Mail ID Generator</h2>
+    <form id="mailIdForm">
+        
+        <label for="formNumber">Form Number:</label>
+        <input type="number" id="formNumber" required placeholder="e.g., 2 or 3">
+        
+        <label for="firstName">First Name (e.g., Rahul):</label>
+        <input type="text" id="firstName" required>
+        
+        <label for="middleName">Middle Name (Optional - e.g., Ram):</label>
+        <input type="text" id="middleName">
+        
+        <label for="lastName">Last Name (e.g., Patel):</label>
+        <input type="text" id="lastName" required>
+        
+        <button type="submit">Generate Mail ID</button>
+    </form>
+    
+    <div id="result-container">
+        <p>Generated Mail ID:</p>
+        <div id="mail-id-display"></div>
+        <button id="copyButton" class="copy-button">Copy to Clipboard</button>
+    </div>
+</div>
 
-    <label for="fullName">Full Name:</label>
-    <input type="text" id="fullName" placeholder="Enter Full Name">
+<script>
+    const form = document.getElementById('mailIdForm');
+    const resultContainer = document.getElementById('result-container');
+    const mailIdDisplay = document.getElementById('mail-id-display');
+    const copyButton = document.getElementById('copyButton');
 
-    <button onclick="generate()">Generate</button>
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+        
+        const formNumber = document.getElementById('formNumber').value.trim();
+        const firstName = document.getElementById('firstName').value.trim();
+        const middleName = document.getElementById('middleName').value.trim();
+        const lastName = document.getElementById('lastName').value.trim();
+        const domain = "@rediffmail.com";
+        const suffix = "_123";
 
-    <div id="output" class="output-box" style="display:none;">
-      <div class="row">
-        <span id="mailText"></span>
-        <button onclick="copyMail()">Copy Mail</button>
-        <button onclick="copyMail()">Copy Mail</button>
-      </div>
-      <div class="row">
-        <span id="passText"></span>
-        <button onclick="copyPassword()">Copy Password</button>
-      </div>
-      <div class="row">
-        <span id="friendText">Friend: Friend</span>
-        <button onclick="copyFriend()">Copy Friend</button>
-      </div>
-    </div>
-  </div>
+        // Function to clean and format a name part
+        const formatPart = (part) => {
+            // Remove spaces and special characters, then capitalize first letter, keep others lowercase
+            // For mail IDs, it's typically all lowercase, and spaces are replaced by underscores
+            return part.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
+        };
 
-  <script>
-    let mail = "", password = "";
+        // Format name parts
+        const fNameFormatted = formatPart(firstName);
+        const mNameFormatted = middleName ? formatPart(middleName) : '';
+        const lNameFormatted = formatPart(lastName);
+        
+        let mailID = '';
 
-    function capitalizeWords(str) {
-      return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
-    }
+        // Construct the mail ID based on your guideline: Formnumber_Name_surname_123@rediffmail.Com
+        if (mNameFormatted) {
+            // Case 3: Rahul Ram Patel -> 3_Rahul_Ram_Patel_123@rediffmail.com
+            mailID = `${formNumber}_${fNameFormatted}_${mNameFormatted}_${lNameFormatted}${suffix}${domain}`;
+        } else {
+            // Case 2: Rahul Patel -> 2_Rahul_Patel_123@rediffmail.com
+            mailID = `${formNumber}_${fNameFormatted}_${lNameFormatted}${suffix}${domain}`;
+        }
 
-    function generate() {
-      let formNo = document.getElementById("formNo").value.trim();
-      let fullName = document.getElementById("fullName").value.trim();
+        mailIdDisplay.textContent = mailID;
+        resultContainer.style.display = 'block';
+        
+        // Reset copy button state
+        copyButton.textContent = 'Copy to Clipboard';
+        copyButton.classList.remove('copied');
+    });
 
-      if (!formNo && !fullName) {
-        alert("Dono likh BDSK");
-        return;
-      }
-      if (!formNo) {
-        alert("Form Number Aapke Abbu Aake Likhnege!");
-        return;
-      }
-      if (!fullName) {
-        alert("Name Aapke Abbu Aake Likhnege!");
-        return;
-      }
+    copyButton.addEventListener('click', function() {
+        const mailID = mailIdDisplay.textContent;
+        
+        // Use modern navigator.clipboard API
+        navigator.clipboard.writeText(mailID).then(() => {
+            copyButton.textContent = '✅ Copied!';
+            copyButton.classList.add('copied');
+            // Revert text after a short delay
+            setTimeout(() => {
+                copyButton.textContent = 'Copy to Clipboard';
+                copyButton.classList.remove('copied');
+            }, 2000);
+        }).catch(err => {
+            console.error('Could not copy text: ', err);
+            copyButton.textContent = '❌ Failed to copy!';
+        });
+    });
+</script>
 
-      // Capitalize each word
-      let formattedName = capitalizeWords(fullName);
-
-      // Replace spaces with underscores for email
-      let emailName = formattedName.replace(/\s+/g, "_");
-
-      // Generate email according to the new guidelines: Formnumber_Name_surname_123@rediffmail.com
-      // The original code was: mail = `${formNo}_${emailName}@rediffmail.com`;
-      mail = `${formNo}_${emailName}_123@rediffmail.com`; // <-- UPDATED LINE
-
-      // First word only for password (Password rules remain the same)
-      let firstName = formattedName.split(" ")[0];
-      password = `${firstName}_sparks_123@`;
-
-      // Show result
-      document.getElementById("mailText").innerText = "Mail: " + mail;
-      document.getElementById("passText").innerText = "Password: " + password;
-      document.getElementById("output").style.display = "block";
-    }
-
-    function copyMail() {
-      if (!mail) {
-        alert("No mail generated yet!");
-        return;
-      }
-      navigator.clipboard.writeText(mail).then(() => {
-        alert("Ok Tip-do Ab Mail paste kar sakte ho :)");
-      });
-    }
-
-    function copyPassword() {
-      if (!password) {
-        alert("No password generated yet!");
-        return;
-      }
-      navigator.clipboard.writeText(password).then(() => {
-        alert("Ok Tip-do Ab Password paste kar sakte ho :)");
-      });
-    }
-
-    function copyFriend() {
-      navigator.clipboard.writeText("Friend").then(() => {
-        alert("Ok Tip-do Ab 'Friend' paste kar sakte ho :)");
-      });
-    }
-  </script>
 </body>
 </html>
-
-<style>
-  body {
-    background-image: url("background.jpg");
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-  }
-</style>
