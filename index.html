@@ -240,9 +240,10 @@
         // Function to update the results
         function updateResult() {
             const city = cityInput.value.trim();
-            // Use the provided current context time (Nov 23, 2025, 8:41:29 PM IST) for demonstration consistency.
-            // In a real browser environment, 'new Date()' would be used.
-            const now = new Date('November 23, 2025 20:41:29 IST'); 
+            
+            // FIX APPLIED: Using new Date() for live time instead of the fixed date.
+            const now = new Date(); 
+            
             const formattedTime = formatDateTime(now);
 
             // Display current date/time
@@ -259,8 +260,8 @@
             }
         }
 
-        // Function to copy the text to the clipboard
-        function copyToClipboardEVC() { // Renamed to avoid collision with copyToClipboard in the second script
+        // Function to copy the text to the clipboard (renamed to prevent conflict)
+        function copyToClipboardEVC() { 
             const textToCopy = resultDisplay.textContent;
             
             // Use the modern Clipboard API
@@ -284,11 +285,13 @@
 
         // Event listeners
         cityInput.addEventListener('input', updateResult);
-        // Updated event listener to use the renamed function
         copyButton.addEventListener('click', copyToClipboardEVC); 
 
         // Initial call to set the time and placeholder text
         updateResult();
+
+        // FIX APPLIED: Set interval to update the time every 1 second (1000ms)
+        setInterval(updateResult, 1000); 
 
         // --- SCRIPT FROM SECOND SNIPPET (Mail ID Generator) ---
         const DOMAIN = "@rediffmail.com";
