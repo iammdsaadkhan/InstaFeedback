@@ -8,168 +8,181 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
-            background-color: #f4f7f9;
-            color: #333;
+            background-color: #f4f4f9;
         }
         .container {
-            max-width: 600px;
+            max-width: 500px;
             margin: auto;
+            padding: 20px;
             background: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         h2 {
             text-align: center;
-            color: #0056b3;
-            margin-bottom: 25px;
+            color: #333;
         }
         label {
             display: block;
-            margin-bottom: 8px;
+            margin: 10px 0 5px;
             font-weight: bold;
+            color: #555;
         }
-        input[type="text"], input[type="number"] {
-            width: 100%;
-            padding: 12px;
+        input[type="text"] {
+            width: calc(100% - 22px);
+            padding: 10px;
             margin-bottom: 20px;
             border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box; /* Important for padding/border calculation */
+            border-radius: 4px;
         }
         button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        #generateBtn {
             background-color: #007bff;
             color: white;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s ease;
             width: 100%;
-            margin-top: 10px;
+            margin-bottom: 15px;
         }
-        button:hover {
+        #generateBtn:hover {
             background-color: #0056b3;
         }
-        #result-container {
-            margin-top: 30px;
+        #resultContainer {
+            margin-top: 20px;
             padding: 15px;
-            border: 2px solid #28a745;
-            border-radius: 5px;
-            background-color: #e2f0e9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #e9ecef;
             display: none; /* Initially hidden */
         }
-        #mail-id-display {
-            font-size: 1.2em;
+        #mailIdOutput {
+            font-size: 1.1em;
             font-weight: bold;
-            color: #28a745;
             word-break: break-all;
+            margin-right: 10px;
+            color: #333;
         }
-        .copy-button {
+        #copyBtn {
             background-color: #28a745;
-            margin-top: 15px;
+            color: white;
+            float: right;
         }
-        .copy-button:hover {
+        #copyBtn:hover {
             background-color: #1e7e34;
         }
-        .copied {
-            background-color: #1e7e34;
+        #copyStatus {
+            margin-top: 10px;
+            color: #28a745;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>📝 Mail ID Generator</h2>
+    <h2>📧 Mail ID Generator</h2>
+    <hr>
     <form id="mailIdForm">
-        
         <label for="formNumber">Form Number:</label>
-        <input type="number" id="formNumber" required placeholder="e.g., 2 or 3">
-        
-        <label for="firstName">First Name (e.g., Rahul):</label>
-        <input type="text" id="firstName" required>
-        
-        <label for="middleName">Middle Name (Optional - e.g., Ram):</label>
-        <input type="text" id="middleName">
-        
-        <label for="lastName">Last Name (e.g., Patel):</label>
-        <input type="text" id="lastName" required>
-        
-        <button type="submit">Generate Mail ID</button>
+        <input type="text" id="formNumber" name="formNumber" placeholder="e.g., 2, 3, 10" required>
+
+        <label for="fullName">Full Name (First Name, Middle Name (Optional), Last Name):</label>
+        <input type="text" id="fullName" name="fullName" placeholder="e.g., Rahul Patel or Rahul Ram Patel" required>
+
+        <button type="button" id="generateBtn" onclick="generateMailId()">Generate Mail ID</button>
     </form>
-    
-    <div id="result-container">
-        <p>Generated Mail ID:</p>
-        <div id="mail-id-display"></div>
-        <button id="copyButton" class="copy-button">Copy to Clipboard</button>
+
+    <div id="resultContainer">
+        <div style="overflow: auto;">
+            <span id="mailIdOutput"></span>
+            <button id="copyBtn" onclick="copyToClipboard()">Copy</button>
+        </div>
+        <div id="copyStatus"></div>
     </div>
 </div>
 
 <script>
-    const form = document.getElementById('mailIdForm');
-    const resultContainer = document.getElementById('result-container');
-    const mailIdDisplay = document.getElementById('mail-id-display');
-    const copyButton = document.getElementById('copyButton');
+    const DOMAIN = "@rediffmail.com";
+    const SUFFIX = "_123";
 
-    form.addEventListener('submit', function(event) {
-        event.preventDefault();
-        
+    function generateMailId() {
         const formNumber = document.getElementById('formNumber').value.trim();
-        const firstName = document.getElementById('firstName').value.trim();
-        const middleName = document.getElementById('middleName').value.trim();
-        const lastName = document.getElementById('lastName').value.trim();
-        const domain = "@rediffmail.com";
-        const suffix = "_123";
+        const fullNameInput = document.getElementById('fullName').value.trim();
+        const resultContainer = document.getElementById('resultContainer');
+        const mailIdOutput = document.getElementById('mailIdOutput');
+        const copyStatus = document.getElementById('copyStatus');
 
-        // Function to clean and format a name part
-        const formatPart = (part) => {
-            // Remove spaces and special characters, then capitalize first letter, keep others lowercase
-            // For mail IDs, it's typically all lowercase, and spaces are replaced by underscores
-            return part.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
-        };
+        // Reset status
+        copyStatus.textContent = '';
+        resultContainer.style.display = 'none';
+        mailIdOutput.textContent = '';
 
-        // Format name parts
-        const fNameFormatted = formatPart(firstName);
-        const mNameFormatted = middleName ? formatPart(middleName) : '';
-        const lNameFormatted = formatPart(lastName);
-        
-        let mailID = '';
-
-        // Construct the mail ID based on your guideline: Formnumber_Name_surname_123@rediffmail.Com
-        if (mNameFormatted) {
-            // Case 3: Rahul Ram Patel -> 3_Rahul_Ram_Patel_123@rediffmail.com
-            mailID = `${formNumber}_${fNameFormatted}_${mNameFormatted}_${lNameFormatted}${suffix}${domain}`;
-        } else {
-            // Case 2: Rahul Patel -> 2_Rahul_Patel_123@rediffmail.com
-            mailID = `${formNumber}_${fNameFormatted}_${lNameFormatted}${suffix}${domain}`;
+        if (!formNumber || !fullNameInput) {
+            alert("Please enter both the Form Number and the Full Name.");
+            return;
         }
 
-        mailIdDisplay.textContent = mailID;
-        resultContainer.style.display = 'block';
-        
-        // Reset copy button state
-        copyButton.textContent = 'Copy to Clipboard';
-        copyButton.classList.remove('copied');
-    });
+        // 1. Sanitize the name: Remove extra spaces and convert to title case for consistency
+        const cleanedName = fullNameInput
+            .replace(/\s+/g, ' ') // Replace multiple spaces with a single space
+            .trim();
 
-    copyButton.addEventListener('click', function() {
-        const mailID = mailIdDisplay.textContent;
+        // 2. Split the name into parts (names are separated by spaces)
+        let nameParts = cleanedName.split(' ');
+
+        // 3. Convert all parts to title case and join them with underscores
+        const nameComponent = nameParts.map(part => 
+            part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
+        ).join('_');
         
-        // Use modern navigator.clipboard API
-        navigator.clipboard.writeText(mailID).then(() => {
-            copyButton.textContent = '✅ Copied!';
-            copyButton.classList.add('copied');
-            // Revert text after a short delay
+        // 4. Construct the final mail ID
+        const generatedId = `${formNumber}_${nameComponent}${SUFFIX}${DOMAIN}`;
+
+        // 5. Display the result
+        mailIdOutput.textContent = generatedId;
+        resultContainer.style.display = 'block';
+    }
+
+    function copyToClipboard() {
+        const mailIdOutput = document.getElementById('mailIdOutput');
+        const copyStatus = document.getElementById('copyStatus');
+        
+        const mailId = mailIdOutput.textContent;
+
+        if (!mailId) {
+            copyStatus.textContent = 'Nothing to copy!';
+            return;
+        }
+        
+        // Use the modern Clipboard API
+        navigator.clipboard.writeText(mailId).then(() => {
+            copyStatus.textContent = '✅ Mail ID copied to clipboard!';
+            
+            // Clear the status message after a short delay
             setTimeout(() => {
-                copyButton.textContent = 'Copy to Clipboard';
-                copyButton.classList.remove('copied');
-            }, 2000);
+                copyStatus.textContent = '';
+            }, 3000);
         }).catch(err => {
+            // Fallback for older browsers or failed copy
             console.error('Could not copy text: ', err);
-            copyButton.textContent = '❌ Failed to copy!';
+            // Fallback: create a temporary textarea element
+            const tempInput = document.createElement('textarea');
+            tempInput.value = mailId;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            
+            copyStatus.textContent = '✅ Mail ID copied (via fallback)!';
+            setTimeout(() => {
+                copyStatus.textContent = '';
+            }, 3000);
         });
-    });
+    }
 </script>
 
 </body>
