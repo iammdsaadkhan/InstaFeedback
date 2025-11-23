@@ -3,37 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mail ID Generator</title>
+    <title>EVC Feedback Form Generator and Mail ID Generator</title>
     <style>
+        /* --- STYLES FOR EVC FEEDBACK FORM GENERATOR (FIRST SNIPPET) --- */
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
             background-color: #f4f4f9;
         }
         .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px; /* Added margin to separate the two containers */
+        }
+        .container-mail { /* New container class for the second form */
             max-width: 500px;
             margin: auto;
             padding: 20px;
             background: #fff;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 30px;
         }
-        h2 {
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .display-box {
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border: 1px solid #ced4da;
+        }
+        #result-display {
+            background-color: #d4edda;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #c3e6cb;
+            font-size: 1.1em;
+            word-wrap: break-word;
+            margin-bottom: 10px; /* Space above the button */
+        }
+        #copy-button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+            width: 100%;
+        }
+        #copy-button:hover {
+            background-color: #0056b3;
+        }
+        #copy-confirmation {
+            margin-top: 10px;
+            color: #28a745;
+            text-align: center;
+            font-weight: bold;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        #copy-button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        /* --- STYLES FOR MAIL ID GENERATOR (SECOND SNIPPET) --- */
+        .container-mail h2 { /* Targeting h2 specifically in the new container */
             text-align: center;
             color: #333;
         }
-        label {
+        .container-mail label {
             display: block;
             margin: 10px 0 5px;
             font-weight: bold;
             color: #555;
         }
-        input[type="text"] {
-            width: calc(100% - 22px);
+        /* Overriding the generic input[type="text"] width for the mail form inputs */
+        .container-mail input[type="text"] {
+            width: calc(100% - 0px); /* Adjusted to match padding/border/box-sizing */
             padding: 10px;
             margin-bottom: 20px;
             border: 1px solid #ccc;
             border-radius: 4px;
+            box-sizing: border-box; /* Ensuring box-sizing is consistent */
         }
         button {
             padding: 10px 15px;
@@ -83,107 +161,214 @@
 </head>
 <body>
 
-<div class="container">
-    <h2>📧 Mail ID Generator</h2>
-    <hr>
-    <form id="mailIdForm">
-        <label for="formNumber">Form Number:</label>
-        <input type="text" id="formNumber" name="formNumber" placeholder="e.g., 2, 3, 10" required>
+    <div class="container">
+        <h1>📝 EVC Feedback Statement Generator</h1>
 
-        <label for="fullName">Full Name (First Name, Middle Name (Optional), Last Name):</label>
-        <input type="text" id="fullName" name="fullName" placeholder="e.g., Rahul Patel or Rahul Ram Patel" required>
+        <label for="city-input">Enter City:</label>
+        <input type="text" id="city-input" placeholder="e.g., Howrah">
 
-        <button type="button" id="generateBtn" onclick="generateMailId()">Generate Mail ID</button>
-    </form>
+        <label>Current Date & Time (IST):</label>
+        <div class="display-box" id="current-datetime">Loading...</div>
 
-    <div id="resultContainer">
-        <div style="overflow: auto;">
-            <span id="mailIdOutput"></span>
-            <button id="copyBtn" onclick="copyToClipboard()">Copy</button>
+        <h2>Generated Statement:</h2>
+        <div id="result-display">
+            Please enter a city above.
         </div>
-        <div id="copyStatus"></div>
+
+        <button id="copy-button" disabled>Copy Statement</button>
+        <div id="copy-confirmation">Copied to Clipboard!</div>
     </div>
-</div>
 
-<script>
-    const DOMAIN = "@rediffmail.com";
-    const SUFFIX = "_123";
+    <div class="container-mail">
+        <h2>📧 Mail ID Generator</h2>
+        <hr>
+        <form id="mailIdForm">
+            <label for="formNumber">Form Number:</label>
+            <input type="text" id="formNumber" name="formNumber" placeholder="e.g., 2, 3, 10" required>
 
-    function generateMailId() {
-        const formNumber = document.getElementById('formNumber').value.trim();
-        const fullNameInput = document.getElementById('fullName').value.trim();
-        const resultContainer = document.getElementById('resultContainer');
-        const mailIdOutput = document.getElementById('mailIdOutput');
-        const copyStatus = document.getElementById('copyStatus');
+            <label for="fullName">Full Name (First Name, Middle Name (Optional), Last Name):</label>
+            <input type="text" id="fullName" name="fullName" placeholder="e.g., Rahul Patel or Rahul Ram Patel" required>
 
-        // Reset status
-        copyStatus.textContent = '';
-        resultContainer.style.display = 'none';
-        mailIdOutput.textContent = '';
+            <button type="button" id="generateBtn" onclick="generateMailId()">Generate Mail ID</button>
+        </form>
 
-        if (!formNumber || !fullNameInput) {
-            alert("Please enter both the Form Number and the Full Name.");
-            return;
+        <div id="resultContainer">
+            <div style="overflow: auto;">
+                <span id="mailIdOutput"></span>
+                <button id="copyBtn" onclick="copyToClipboard()">Copy</button>
+            </div>
+            <div id="copyStatus"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- SCRIPT FROM FIRST SNIPPET (EVC Feedback Form Generator) ---
+        const cityInput = document.getElementById('city-input');
+        const dateTimeDisplay = document.getElementById('current-datetime');
+        const resultDisplay = document.getElementById('result-display');
+        const copyButton = document.getElementById('copy-button');
+        const copyConfirmation = document.getElementById('copy-confirmation');
+        const evcCode = 'FS2025';
+
+        // Function to format the date and time
+        function formatDateTime(date) {
+            // Get date components (DD-MM-YYYY)
+            const DD = String(date.getDate()).padStart(2, '0');
+            const MM = String(date.getMonth() + 1).padStart(2, '0');
+            const YYYY = date.getFullYear();
+
+            // Get time components (HH:MM XM)
+            let HH = date.getHours();
+            const MM_minutes = String(date.getMinutes()).padStart(2, '0');
+            const XM = HH >= 12 ? 'PM' : 'AM';
+
+            // Convert to 12-hour format
+            HH = HH % 12;
+            HH = HH ? HH : 12;
+            const HH_formatted = String(HH).padStart(2, '0');
+
+            const datePart = `${DD}-${MM}-${YYYY}`;
+            const timePart = `${HH_formatted}:${MM_minutes} ${XM} IST`;
+
+            return {
+                dateOnly: datePart,
+                timeOnly: timePart,
+                full: `${datePart} ${timePart}`
+            };
         }
 
-        // 1. Sanitize the name: Remove extra spaces and convert to title case for consistency
-        const cleanedName = fullNameInput
-            .replace(/\s+/g, ' ') // Replace multiple spaces with a single space
-            .trim();
+        // Function to update the results
+        function updateResult() {
+            const city = cityInput.value.trim();
+            // Use the provided current context time (Nov 23, 2025, 8:41:29 PM IST) for demonstration consistency.
+            // In a real browser environment, 'new Date()' would be used.
+            const now = new Date('November 23, 2025 20:41:29 IST'); 
+            const formattedTime = formatDateTime(now);
 
-        // 2. Split the name into parts (names are separated by spaces)
-        let nameParts = cleanedName.split(' ');
+            // Display current date/time
+            dateTimeDisplay.textContent = formattedTime.full;
 
-        // 3. Convert all parts to title case and join them with underscores
-        const nameComponent = nameParts.map(part => 
-            part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
-        ).join('_');
-        
-        // 4. Construct the final mail ID
-        const generatedId = `${formNumber}_${nameComponent}${SUFFIX}${DOMAIN}`;
-
-        // 5. Display the result
-        mailIdOutput.textContent = generatedId;
-        resultContainer.style.display = 'block';
-    }
-
-    function copyToClipboard() {
-        const mailIdOutput = document.getElementById('mailIdOutput');
-        const copyStatus = document.getElementById('copyStatus');
-        
-        const mailId = mailIdOutput.textContent;
-
-        if (!mailId) {
-            copyStatus.textContent = 'Nothing to copy!';
-            return;
+            // Generate the final statement
+            if (city) {
+                const statement = `My EVC Code is ${evcCode} and I have submitted my feedback on (${formattedTime.full}) at ${city}`;
+                resultDisplay.textContent = statement;
+                copyButton.disabled = false; // Enable button when city is entered
+            } else {
+                resultDisplay.textContent = 'Please enter a city to generate the full statement.';
+                copyButton.disabled = true; // Disable button when city is empty
+            }
         }
-        
-        // Use the modern Clipboard API
-        navigator.clipboard.writeText(mailId).then(() => {
-            copyStatus.textContent = '✅ Mail ID copied to clipboard!';
+
+        // Function to copy the text to the clipboard
+        function copyToClipboardEVC() { // Renamed to avoid collision with copyToClipboard in the second script
+            const textToCopy = resultDisplay.textContent;
             
-            // Clear the status message after a short delay
-            setTimeout(() => {
-                copyStatus.textContent = '';
-            }, 3000);
-        }).catch(err => {
-            // Fallback for older browsers or failed copy
-            console.error('Could not copy text: ', err);
-            // Fallback: create a temporary textarea element
-            const tempInput = document.createElement('textarea');
-            tempInput.value = mailId;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempInput);
+            // Use the modern Clipboard API
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                // Show confirmation message
+                copyConfirmation.style.visibility = 'visible';
+                copyConfirmation.style.opacity = '1';
+                
+                // Hide confirmation message after 2 seconds
+                setTimeout(() => {
+                    copyConfirmation.style.opacity = '0';
+                    setTimeout(() => {
+                        copyConfirmation.style.visibility = 'hidden';
+                    }, 300); // Wait for fade-out transition
+                }, 2000);
+            }).catch(err => {
+                console.error('Could not copy text: ', err);
+                alert('Failed to copy. Please copy the text manually.');
+            });
+        }
+
+        // Event listeners
+        cityInput.addEventListener('input', updateResult);
+        // Updated event listener to use the renamed function
+        copyButton.addEventListener('click', copyToClipboardEVC); 
+
+        // Initial call to set the time and placeholder text
+        updateResult();
+
+        // --- SCRIPT FROM SECOND SNIPPET (Mail ID Generator) ---
+        const DOMAIN = "@rediffmail.com";
+        const SUFFIX = "_123";
+
+        function generateMailId() {
+            const formNumber = document.getElementById('formNumber').value.trim();
+            const fullNameInput = document.getElementById('fullName').value.trim();
+            const resultContainer = document.getElementById('resultContainer');
+            const mailIdOutput = document.getElementById('mailIdOutput');
+            const copyStatus = document.getElementById('copyStatus');
+
+            // Reset status
+            copyStatus.textContent = '';
+            resultContainer.style.display = 'none';
+            mailIdOutput.textContent = '';
+
+            if (!formNumber || !fullNameInput) {
+                alert("Please enter both the Form Number and the Full Name.");
+                return;
+            }
+
+            // 1. Sanitize the name: Remove extra spaces and convert to title case for consistency
+            const cleanedName = fullNameInput
+                .replace(/\s+/g, ' ') // Replace multiple spaces with a single space
+                .trim();
+
+            // 2. Split the name into parts (names are separated by spaces)
+            let nameParts = cleanedName.split(' ');
+
+            // 3. Convert all parts to title case and join them with underscores
+            const nameComponent = nameParts.map(part => 
+                part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
+            ).join('_');
             
-            copyStatus.textContent = '✅ Mail ID copied (via fallback)!';
-            setTimeout(() => {
-                copyStatus.textContent = '';
-            }, 3000);
-        });
-    }
-</script>
+            // 4. Construct the final mail ID
+            const generatedId = `${formNumber}_${nameComponent}${SUFFIX}${DOMAIN}`;
+
+            // 5. Display the result
+            mailIdOutput.textContent = generatedId;
+            resultContainer.style.display = 'block';
+        }
+
+        function copyToClipboard() {
+            const mailIdOutput = document.getElementById('mailIdOutput');
+            const copyStatus = document.getElementById('copyStatus');
+            
+            const mailId = mailIdOutput.textContent;
+
+            if (!mailId) {
+                copyStatus.textContent = 'Nothing to copy!';
+                return;
+            }
+            
+            // Use the modern Clipboard API
+            navigator.clipboard.writeText(mailId).then(() => {
+                copyStatus.textContent = '✅ Mail ID copied to clipboard!';
+                
+                // Clear the status message after a short delay
+                setTimeout(() => {
+                    copyStatus.textContent = '';
+                }, 3000);
+            }).catch(err => {
+                // Fallback for older browsers or failed copy
+                console.error('Could not copy text: ', err);
+                // Fallback: create a temporary textarea element
+                const tempInput = document.createElement('textarea');
+                tempInput.value = mailId;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
+                
+                copyStatus.textContent = '✅ Mail ID copied (via fallback)!';
+                setTimeout(() => {
+                    copyStatus.textContent = '';
+                }, 3000);
+            });
+        }
+    </script>
 
 </body>
 </html>
